@@ -1,18 +1,30 @@
-//Common cathode for the 3 individual digits on 3*sevensegment display
+//pin assignment - Common cathode for the 3 individual digits on 3*sevensegment display
 const int DIGIT1 = 11;
 const int DIGIT2 = 12;
 const int DIGIT3 = 13;
 
-//binary values for digital output to BCD-encoder
+//pin assignment - binary values for digital output to BCD-encoder
 const int BCD_A = 2;
 const int BCD_B = 3;
 const int BCD_C = 4;
 const int BCD_D = 5;
 
+//pin assignment - function selection
+const int FUNCTION_1 = 7;
+const int FUNCTION_2 = 8;
+const int FUNCTION_3 = 9;
+const int FUNCTION_4 = 10;
+
 const int WAIT_TIME_MS = 10;
 
 int hundratal = 0, tiotal=0, ental=0;
 int counter = 0;
+
+int fkn1 = 0;
+int fkn2 = 0;
+int fkn3 = 0;
+int fkn4 = 0;
+int function_select = 0;
 
 void setup() {
   pinMode(DIGIT1, OUTPUT);
@@ -24,6 +36,11 @@ void setup() {
   pinMode(BCD_C, OUTPUT);
   pinMode(BCD_D, OUTPUT);
 
+  pinMode(FUNCTION_1, INPUT);
+  pinMode(FUNCTION_2, INPUT);
+  pinMode(FUNCTION_3, INPUT);
+  pinMode(FUNCTION_4, INPUT);
+
   //all digits off from start
   digitalWrite(DIGIT1, HIGH);
   digitalWrite(DIGIT2, HIGH);
@@ -31,6 +48,32 @@ void setup() {
 }
 
 void loop() {
+  fkn1 = digitalRead(FUNCTION_1);
+  fkn2 = digitalRead(FUNCTION_2);
+  fkn3 = digitalRead(FUNCTION_3);
+  fkn4 = digitalRead(FUNCTION_4);
+  //Concatinate to one 4-bit word
+  function_select = ((fkn4 << 3)) | (fkn3 << 2) | (fkn2 << 1) | (fkn1 << 0);
+
+  switch (function_select) {
+    case 0b0001:
+      counter = 1;
+      break;
+    case 0b0010:
+      counter = 2;
+      break;
+    case 0b0100:
+      counter = 4;
+      break;
+    case 0b1000:
+      counter = 8;
+      break;
+    default:
+      counter++;
+      break;
+  }
+  
+  
   hundratal = (counter / 100) & 0xF; // Hundratal i BCD
 
   // Accessa och styra GPIO med enskilda bitar från hundratal
@@ -64,5 +107,4 @@ void loop() {
   delay(WAIT_TIME_MS);
   digitalWrite(DIGIT3, HIGH);
 
-  counter++;
 }
