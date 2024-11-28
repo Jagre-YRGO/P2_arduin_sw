@@ -20,6 +20,9 @@ const int FUNCTION_4 = 10;
 
 const int WAIT_TIME_MS = 10;
 
+const int R1_LOW = 326;
+const int U_REF = 5;
+
 int hundratal = 0, tiotal=0, ental=0;
 unsigned int counter = 0;
 
@@ -79,8 +82,15 @@ void loop() {
       dp2 = LOW;
       dp3 = LOW;
       break;
+    //Resistance - low range
     case 0b0100:
-      counter = 4;
+      float U_in = map(analogRead(A2),0,1023,0,500);
+      U_in = U_in/100;
+      unsigned int r2 = (unsigned int)(U_in*R1_LOW)/(U_REF-U_in);
+      //int r2 = (analogRead(A2));
+      Serial.print("U_in: ");Serial.print(U_in);
+      Serial.print(" r2: "); Serial.println(r2);
+      counter = r2;
       dp1 = LOW;
       dp2 = LOW;
       dp3 = LOW;
