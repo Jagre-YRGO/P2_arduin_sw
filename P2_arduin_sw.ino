@@ -21,6 +21,7 @@ const int FUNCTION_4 = 10;
 const int WAIT_TIME_MS = 10;
 
 const int R1_LOW = 326;
+const int R1_HIGH = 34300;
 const int U_REF = 5;
 
 int hundratal = 0, tiotal=0, ental=0;
@@ -32,6 +33,8 @@ int fkn3 = 0;
 int fkn4 = 0;
 int function_select = 0;
 int dp1 = 0, dp2 = 0, dp3 = 0;
+float U_in = 0;
+long int r2 = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -42,6 +45,8 @@ void setup() {
   pinMode(DIGIT3, OUTPUT);
   
   pinMode(DM_POINT, OUTPUT);
+
+  pinMode(A4, OUTPUT);
 
   pinMode(BCD_A, OUTPUT);
   pinMode(BCD_B, OUTPUT);
@@ -58,6 +63,9 @@ void setup() {
   digitalWrite(DIGIT2, HIGH);
   digitalWrite(DIGIT3, HIGH);
   digitalWrite(DM_POINT, HIGH);
+
+  //Buzzer off from start
+  digitalWrite(A4, LOW);
 }
 
 void loop() {
@@ -75,37 +83,43 @@ void loop() {
       dp1 = HIGH;
       dp2 = LOW;
       dp3 = LOW;
+      digitalWrite(A4, LOW);
       break;
     case 0b0010:
       counter = 2;
       dp1 = LOW;
       dp2 = LOW;
       dp3 = LOW;
+      digitalWrite(A4, LOW);
       break;
     //Resistance - low range
     case 0b0100:
-      float U_in = map(analogRead(A2),0,1023,0,500);
+      U_in = map(analogRead(A2),0,1023,0,500);
       U_in = U_in/100;
-      unsigned int r2 = (unsigned int)(U_in*R1_LOW)/(U_REF-U_in);
-      //int r2 = (analogRead(A2));
-      Serial.print("U_in: ");Serial.print(U_in);
-      Serial.print(" r2: "); Serial.println(r2);
+      r2 = (unsigned int)(U_in*R1_LOW)/(U_REF-U_in);
       counter = r2;
       dp1 = LOW;
       dp2 = LOW;
       dp3 = LOW;
+      digitalWrite(A4, LOW);
       break;
+    //Resistance - high range
     case 0b1000:
-      counter = 8;
+      U_in = map(analogRead(A3),0,1023,0,500);
+      U_in = U_in/100;
+      r2 = (long int)(U_in*R1_HIGH)/(U_REF-U_in);
+      counter = (int)(r2/1000); //display kilo-ohm
       dp1 = LOW;
       dp2 = LOW;
       dp3 = LOW;
+      digitalWrite(A4, LOW);
       break;
     default:
       counter++;
       dp1 = LOW;
       dp2 = LOW;
       dp3 = LOW;
+      digitalWrite(A4, HIGH);
       break;
   }
   
